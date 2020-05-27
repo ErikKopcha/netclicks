@@ -1,10 +1,21 @@
 const IMG_URL = 'https://image.tmdb.org/t/p/w185_and_h278_bestv2';
 const API_KEY = '5c7771dc114092e0d6ec416fd461e631';
 
-const leftMenu = document.querySelector('.left-menu'),
+let leftMenu = document.querySelector('.left-menu'),
   hamburger = document.querySelector('.hamburger'),
   tvShowsList = document.querySelector('.tv-shows__list'),
-  modal = document.querySelector('.modal');
+  modal = document.querySelector('.modal'),
+  wrapperShows = document.querySelector('.tv-shows'),
+  cardImg = document.querySelector('.tv-card__img'),
+  modalTitle = document.querySelector('.modal__title'),
+  genresList = document.querySelector('.genres-list'),
+  rating = document.querySelector('.rating'),
+  description = document.querySelector('.description'),
+  modalLink = document.querySelector('.modal__link');
+
+const preloader = document.createElement('div');
+preloader.className = 'loading';
+
 
 class DBService {
   getData = async (url) => {
@@ -16,9 +27,17 @@ class DBService {
     }
   }
 
-  getTestData = async (url) => {
-    return await this.getData('test.json');
+  getTestData = () => {
+    return this.getData('test.json');
   }
+  
+  getTestCard = () => {
+    return this.getData('card.json');
+  }
+  
+  // getSearchResult = () => {
+  //   return this.getData('search');
+  // };
 }
 
 const renderCard = response => {
@@ -32,13 +51,13 @@ const renderCard = response => {
     
     const posterIMG = poster ? IMG_URL + poster : 'img/no-poster.jpg';
     const backdropIMG = backdrop ? IMG_URL + backdrop : ''; 
-    const voteElem = vote ? `${vote}` : 7.9;
+    const voteElem = vote ? `<span class="tv-card__vote">${vote}</span>` : '';
     
     const card = document.createElement('li');
     card.classList.add('tv-shows__item');
     card.innerHTML = `
             <a href="#" class="tv-card">
-              <span class="tv-card__vote">${voteElem}</span>
+              ${voteElem}
               <img class="tv-card__img"
                 src="${posterIMG}"
                 data-backdrop="${backdropIMG}"
@@ -46,12 +65,15 @@ const renderCard = response => {
               <h4 class="tv-card__head">${title}</h4>
             </a>
     `;
-    
+    preloader.remove();
     tvShowsList.append(card);
   });
 };
 
-new DBService().getTestData().then(renderCard);
+{
+  wrapperShows.append(preloader);
+  new DBService().getTestData().then(renderCard);
+}
 
 hamburger.addEventListener('click', () => {
   leftMenu.classList.toggle('openMenu');
@@ -91,8 +113,27 @@ tvShowsList.addEventListener('click', evt => {
   const card = target.closest('.tv-card');
   
   if (card) {
-    document.body.style.overflow = 'hidden';
-    modal.classList.remove('hide')
+    new DBService().getTestCard().then(data => {
+      console.log(data);
+      cardImg.src = IMG_URL + data.poster_path;
+      modalTitle.textContent = data.name;
+      // genresList.innerHTML = data.genres.reduce((acc, item) => { return `${acc}<li>${item}</li>` }, '');
+      // for(const item of data.genres) {
+      //   genresList.innerHTML += `<li>${item}</li>`;
+      // }
+      genresList.textContent = '';
+      data.genres.forEach(item => {
+        genresList.innerHTML += `<li>${item.name}</li>`;
+      });
+      
+      // rating
+      // description
+      // modalLink
+    })
+    .then(() => {
+      document.body.style.overflow = 'hidden';
+      modal.classList.remove('hide');
+    });
   }
 });
 
