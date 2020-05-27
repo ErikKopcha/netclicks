@@ -32,7 +32,7 @@ const renderCard = response => {
     
     const posterIMG = poster ? IMG_URL + poster : 'img/no-poster.jpg';
     const backdropIMG = backdrop ? IMG_URL + backdrop : ''; 
-    const voteElem = vote ? `${vote}` : '~';
+    const voteElem = vote ? `${vote}` : 7.9;
     
     const card = document.createElement('li');
     card.classList.add('tv-shows__item');
