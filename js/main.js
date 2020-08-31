@@ -67,6 +67,7 @@ const renderCard = response => {
     `;
     preloader.remove();
     tvShowsList.append(card);
+    const search = new Search('searchText', '.tv-shows__item');
   });
 };
 
@@ -96,14 +97,6 @@ leftMenu.addEventListener('click', evt => {
     leftMenu.classList.add('openMenu');
     hamburger.classList.add('open');
   }
-
-  // const dropdown = document.querySelectorAll('.dropdown');
-
-  // dropdown.forEach((el) => {
-  //   el.addEventListener('click', () => {
-  //     el.classList.toggle('active');
-  //   });
-  // });
 });
 
 // modal
@@ -117,18 +110,10 @@ tvShowsList.addEventListener('click', evt => {
       console.log(data);
       cardImg.src = IMG_URL + data.poster_path;
       modalTitle.textContent = data.name;
-      // genresList.innerHTML = data.genres.reduce((acc, item) => { return `${acc}<li>${item}</li>` }, '');
-      // for(const item of data.genres) {
-      //   genresList.innerHTML += `<li>${item}</li>`;
-      // }
       genresList.textContent = '';
       data.genres.forEach(item => {
         genresList.innerHTML += `<li>${item.name}</li>`;
       });
-      
-      // rating
-      // description
-      // modalLink
     })
     .then(() => {
       document.body.style.overflow = 'hidden';
@@ -165,3 +150,55 @@ const changeImage = evt => {
 tvShowsList.addEventListener('mouseover', changeImage);
 tvShowsList.addEventListener('mouseout', changeImage);
 
+// поиск
+class Search {
+  constructor(inputId, items) {
+    this.searchInput = document.getElementById(inputId);
+    this.items = document.querySelectorAll(items);
+    this.init();
+  }
+
+  init() {
+    this.search();
+  }
+
+  search() {
+    // event на поле поиска
+    this.searchInput.addEventListener('keyup', () => {
+      // получаем информацию с поиска и убираем пробелы
+      let value = this.searchInput.value.toLowerCase().trim();
+
+      if (value != '') {
+        this.items.forEach(el => {
+          // получаем только текст, без тегов.
+          // search - ищет подстроку в строке и возвращает номер подстроки / -1 (если нет)
+          if (el.innerText.toLowerCase().search(value) == -1) {
+            this.hideElement(el);
+          } else {
+            this.showElement(el);
+          }
+        });
+      } else {
+        this.items.forEach(el => {
+          this.showElement(el);
+        });
+      }
+    });
+  }
+
+  showElement(el) {
+    el.style.display = 'block';
+
+    // setTimeout(() => {
+    //   el.style.display = 'block';
+    // }, 200);
+  }
+
+  hideElement(el) {
+    el.style.display = 'none';
+
+    // setTimeout(() => {
+    //   el.style.display = 'none';
+    // }, 1000);
+  }
+}
